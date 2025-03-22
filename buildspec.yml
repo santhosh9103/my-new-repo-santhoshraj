@@ -1,35 +1,18 @@
-version: 0.2
-
-phases:
-  install:
-    runtime-versions:
-      java: corretto8
-  pre_build:
-    commands:
-      - echo Initializing environment
-      - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain nextwork --domain-owner 471112976395 --region us-east-2 --query authorizationToken --output text`
-  build:
-    commands:
-      - echo "====== BEGINNING TEST PHASE ======"
-      - echo "Running tests on `date`"
-      - chmod +x run-tests.sh
-      - ./run-tests.sh
-      - echo "====== TEST PHASE COMPLETE ======"
-      - echo "====== BEGINNING BUILD PHASE ======"
-      - echo "Build started on `date`"
-      - mvn -s settings.xml compile
-      - echo "====== BUILD PHASE COMPLETE ======"
-  
-  post_build:
-    commands:
-      - echo "Build completed on `date`"
-      - mvn -s settings.xml package
-
-artifacts:
-  files:
-    - target/nextwork-web-project.war
-
-
-
-
-
+version: 0.0
+ os: linux
+ files:
+   - source: /target/nextwork-web-project.war
+     destination: /usr/share/tomcat/webapps/
+ hooks:
+   BeforeInstall:
+     - location: scripts/install_dependencies.sh
+       timeout: 300
+       runas: root
+   ApplicationStart:
+     - location: scripts/start_server.sh
+       timeout: 300
+       runas: root
+   ApplicationStop:
+     - location: scripts/stop_server.sh
+       timeout: 300
+       runas: root
